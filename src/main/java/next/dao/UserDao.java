@@ -1,117 +1,53 @@
 package next.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
-
-import core.jdbc.ConnectionManager;
 import next.model.User;
+import next.support.context.JdbcTemplate;
+import next.support.context.RowMapper;
 
 public class UserDao {
-    public void insert(User user) throws SQLException {
-        Connection con = null;
-        PreparedStatement pstmt = null;
-        try {
-            con = ConnectionManager.getConnection();
-            String sql = "INSERT INTO USERS VALUES (?, ?, ?, ?)";
-            pstmt = con.prepareStatement(sql);
-            pstmt.setString(1, user.getUserId());
-            pstmt.setString(2, user.getPassword());
-            pstmt.setString(3, user.getName());
-            pstmt.setString(4, user.getEmail());
 
-            pstmt.executeUpdate();
-        } finally {
-            closeConnection(con, pstmt);
-        }
+    public void insert(User user) throws SQLException {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate();
+        String sql = "INSERT INTO USERS VALUES (?, ?, ?, ?)";
+        jdbcTemplate.executeUpdate(sql, user.getUserId(), user.getPassword(), user.getName(), user.getEmail());
     }
 
+
     public void update(User user) throws SQLException {
-        Connection con = null;
-        PreparedStatement pstmt = null;
-        try{
-            con = ConnectionManager.getConnection();
-            String sql = "UPDATE USERS SET userId=?, password=?, name=?, email=? WHERE userId=?";
-            pstmt = con.prepareStatement(sql);
-            pstmt.setString(1, user.getUserId());
-            pstmt.setString(2, user.getPassword());
-            pstmt.setString(3, user.getName());
-            pstmt.setString(4, user.getEmail());
-            // 말이 안되는 로직인데
-            pstmt.setString(5, user.getUserId());
-            pstmt.executeUpdate();
-        }finally {
-            closeConnection(con, pstmt);
-        }
+        JdbcTemplate jdbcTemplate = new JdbcTemplate();
+        String sql = "UPDATE USERS SET userId=?, password=?, name=?, email=? WHERE userId=?";
+        jdbcTemplate.executeUpdate(sql, user.getUserId(), user.getPassword(), user.getName(), user.getEmail(), user.getUserId());
     }
 
     public List<User> findAll() throws SQLException {
-        Connection con = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try{
-            con = ConnectionManager.getConnection();
-            String sql = "SELECT userId, password, name, email FROM USERS";
-            pstmt = con.prepareStatement(sql);
-            rs = pstmt.executeQuery();
-            List<User> users = new ArrayList<>();
-            while(rs.next()){
-                users.add(new User(rs.getString("userId"), rs.getString("password"), rs.getString("name"),
-                        rs.getString("email")));
-            }
-            return users;
-        }finally {
-            closeConnection(con, pstmt, rs);
-        }
-
+        RowMapper<User> rowMapper = rs -> {
+            return new User(
+                    rs.getString("userId"),
+                    rs.getString("password"),
+                    rs.getString("name"),
+                    rs.getString("email"));
+        };
+        
+        JdbcTemplate jdbcTemplate = new JdbcTemplate();
+        String sql = "SELECT userId, password, name, email FROM USERS";
+        return jdbcTemplate.list(sql, rowMapper);
     }
 
     public User findByUserId(String userId) throws SQLException {
-        Connection con = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            con = ConnectionManager.getConnection();
-            String sql = "SELECT userId, password, name, email FROM USERS WHERE userid=?";
-            pstmt = con.prepareStatement(sql);
-            pstmt.setString(1, userId);
-
-            rs = pstmt.executeQuery();
-
-            User user = null;
-            if (rs.next()) {
-                user = new User(rs.getString("userId"), rs.getString("password"), rs.getString("name"),
-                        rs.getString("email"));
-            }
-
-            return user;
-        } finally {
-            closeConnection(con, pstmt, rs);
-        }
+        RowMapper<User> rowMapper = rs -> {
+            return new User(
+                    rs.getString("userId"),
+                    rs.getString("password"),
+                    rs.getString("name"),
+                    rs.getString("email"));
+        };
+        JdbcTemplate jdbcTemplate = new JdbcTemplate();
+        String sql = "SELECT userId, password, name, email FROM USERS WHERE userid=?";
+        return (User)jdbcTemplate.executeQuery(sql, rowMapper, userId);
     }
 
-    private void closeConnection(Connection con, PreparedStatement pstmt, ResultSet rs) throws SQLException {
-        if (rs != null) {
-            rs.close();
-        }
-        if (pstmt != null) {
-            pstmt.close();
-        }
-        if (con != null) {
-            con.close();
-        }
-    }
 
-    private void closeConnection(Connection con, PreparedStatement pstmt) throws SQLException {
-
-        if (pstmt != null) {
-            pstmt.close();
-        }
-        if (con != null) {
-            con.close();
-        }
-    }
+    
 }

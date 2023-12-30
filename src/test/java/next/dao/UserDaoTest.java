@@ -38,8 +38,6 @@ public class UserDaoTest {
     @Test
     public void findAll() throws Exception {
         UserDao userDao = new UserDao();
-        User expected = new User("userId", "password", "name", "javajigi@email.com");
-        userDao.insert(expected);
         List<User> users = userDao.findAll();
         assertEquals(1, users.size());
     }

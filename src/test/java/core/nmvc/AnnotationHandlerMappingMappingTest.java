@@ -9,7 +9,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 import core.mvc.ModelAndView;
 
-public class AnnotationHandlerMappingTest {
+public class AnnotationHandlerMappingMappingTest {
     private AnnotationHandlerMapping handlerMapping;
     private MockHttpServletResponse response;
 

@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import core.annotation.RequestMapping;
 import core.annotation.RequestMethod;
+import core.mvc.HandlerMapping;
 import core.nmvc.HandlerExecution;
 import core.reflections.ControllerScanner;
 import core.reflections.HandlerKey;
@@ -16,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.reflections.ReflectionUtils;
 
 @Slf4j
-public class AnnotationHandlerMapping {
+public class AnnotationHandlerMapping implements HandlerMapping {
     private Object[] basePackage;
 
     private Map<core.reflections.HandlerKey, HandlerExecution> handlerExecutions = Maps.newHashMap();
@@ -40,7 +41,7 @@ public class AnnotationHandlerMapping {
             );
         }
     }
-
+    @Override
     public HandlerExecution getHandler(HttpServletRequest request){
         String requestURI = request.getRequestURI();
         RequestMethod rm = RequestMethod.valueOf(
